@@ -108,8 +108,9 @@ Before publishing, show the user a preview:
    gh repo clone <owner/repo> <temp-dir>
    cd <temp-dir>
 
-   # Use gh for git credentials (avoids OAuth app conflicts with SAML)
-   git config --local credential.helper '!gh auth git-credential'
+   # CRITICAL: Set remote URL with gh token to bypass other OAuth apps (VS Code, etc.)
+   TOKEN=$(gh auth token)
+   git remote set-url origin "https://x-access-token:${TOKEN}@github.com/<owner/repo>.git"
 
    git checkout gh-pages || git checkout --orphan gh-pages
 

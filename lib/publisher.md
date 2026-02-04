@@ -59,6 +59,11 @@ cd "$TEMP_DIR"
 Clone the repository:
 ```bash
 gh repo clone <owner/repo> . -- --depth 1
+
+# CRITICAL: Always set remote URL with gh token to avoid OAuth app conflicts
+# This prevents issues with VS Code or other apps that have cached credentials
+TOKEN=$(gh auth token)
+git remote set-url origin "https://x-access-token:${TOKEN}@github.com/<owner/repo>.git"
 ```
 
 ### Step 3: Set Up gh-pages Branch
@@ -227,10 +232,14 @@ This organization requires SSO authentication.
 
 When `gh repo clone` works but `git push` fails with "re-authorize the OAuth Application":
 ```bash
-# Use gh as git credential helper instead of other OAuth apps
-git config --local credential.helper '!gh auth git-credential'
+# IMPORTANT: The credential.helper approach does NOT reliably work
+# Instead, embed the gh token directly in the remote URL:
+TOKEN=$(gh auth token)
+git remote set-url origin "https://x-access-token:${TOKEN}@github.com/<owner/repo>.git"
 git push -u origin gh-pages
 ```
+
+This bypasses any cached credentials from VS Code or other OAuth apps.
 
 ### Repository Errors
 
