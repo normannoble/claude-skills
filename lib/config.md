@@ -96,16 +96,18 @@ Claude: Done! Defaults saved:
 
 This creates/updates `~/.claude/pages-config.json`.
 
-### Visibility Selection
+### Visibility Selection (User-Friendly)
 
-When publishing with both defaults configured, Claude asks:
+When publishing with both defaults configured, ask in plain language:
 
 ```
-Claude: Should this be public or private?
+Claude: Who should be able to see this page?
 
-        1. Public (username/site) - Anyone can view
-        2. Private (myorg/internal) - Only org members can view
+        1. Everyone on the internet
+        2. Only people in your organization
 ```
+
+Don't mention repo names in the question - just show the choice.
 
 If only one default is set, that's used without asking.
 

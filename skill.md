@@ -24,8 +24,21 @@ Check if there's substantial prior conversation (more than a few exchanges). If 
 1. **Analyze the conversation** to identify distinct, publishable topics
 2. **Present topics to user** as a numbered list with brief descriptions
 3. **Ask which topics to include** (guided extraction - don't auto-decide)
-4. **Ask about structure**: Single page with sections, or multi-page site with navigation?
-5. **Ask about styling preferences**: Minimal/clean, professional/corporate, or colorful/modern?
+4. **Ask about layout** (user-friendly language):
+   ```
+   Claude: How would you like this organized?
+
+           1. One scrollable page (everything together, easy to share)
+           2. Separate pages with a menu (better for longer content)
+   ```
+5. **Ask about look and feel** (user-friendly):
+   ```
+   Claude: What style fits best?
+
+           1. Clean and simple
+           2. Professional
+           3. Modern and colorful
+   ```
 
 ### Step 2B: Fresh Creation (if no prior conversation)
 
@@ -76,32 +89,49 @@ Before publishing, show the user a preview:
    ```
    If not authenticated, guide user through `gh auth login`
 
-2. **Determine target repository** (see lib/config.md for details):
+2. **Determine where to publish** (see lib/config.md for details):
 
    Resolution order:
    - Command argument: `/pages --repo owner/repo`
    - Project config: `.claude/pages.json` in current directory
    - Enterprise policy: `~/.claude/pages-policy.json` (if exists, only allowed repos)
    - User default: `~/.claude/pages-config.json`
-   - Interactive prompt: Ask user for `owner/repo`
+   - Interactive prompt (user-friendly)
+
+   **If no config exists, ask in friendly terms:**
+   ```
+   Claude: Where would you like to publish this?
+
+           If you have a GitHub URL, paste it here.
+           Or I can list your available repositories.
+   ```
+
+   Accept any of these formats:
+   - Full URL: `https://github.com/username/my-site`
+   - Short form: `username/my-site`
+   - Just paste from browser
 
    If enterprise policy exists, validate repo is in allowed list before proceeding.
 
-3. **Determine folder name**:
+3. **Ask for a title** (user-friendly):
 
-   Each conversation is published to its own folder within the repo. Ask the user for a name or suggest one based on the content:
+   Don't ask for a "folder name" - ask for a title and auto-generate the URL:
 
    ```
-   Claude: What should I name this site's folder?
-           Suggested: "product-strategy-2026" (based on our discussion)
-
-           This will be published to: https://owner.github.io/repo/product-strategy-2026/
+   Claude: What should we call this page?
+           Suggested: "Product Strategy 2026" (based on our discussion)
    ```
 
-   Folder naming rules:
-   - Lowercase, hyphenated (e.g., `quarterly-review-q1`)
-   - No spaces or special characters
-   - Must not already exist in the repo
+   After user confirms or provides a title:
+   ```
+   Claude: Great! Your page will be at:
+           https://yoursite.github.io/pages/product-strategy-2026/
+   ```
+
+   **Behind the scenes** (don't expose to user):
+   - Convert title to URL-safe slug: lowercase, replace spaces with hyphens
+   - Remove special characters
+   - Check for conflicts silently, append number if needed (e.g., `-2`)
 
 4. **Clone and prepare**:
    ```bash
@@ -135,19 +165,17 @@ Before publishing, show the user a preview:
    git push -u origin gh-pages
    ```
 
-7. **Update repo index** (optional):
+7. **Update homepage** (handle silently or ask simply):
 
-   Generate/update a root `index.html` that lists all published sites in the repo:
+   If user has multiple pages published, automatically maintain a homepage that lists them all.
 
-   ```html
-   <h1>Published Sites</h1>
-   <ul>
-     <li><a href="product-strategy-2026/">Product Strategy 2026</a></li>
-     <li><a href="quarterly-review/">Quarterly Review</a></li>
-   </ul>
+   Only ask if this is their first publish:
+   ```
+   Claude: Would you like a homepage that lists all your published pages?
+           (You can always add more pages later and they'll appear automatically)
    ```
 
-   Ask user: "Should I update the repo's index page to include this site?"
+   If they say yes or don't respond, create it automatically. Don't mention "index.html" or technical terms.
 
 8. **Return the published URL**: `https://<owner>.github.io/<repo>/<folder-name>/`
 
@@ -163,21 +191,22 @@ Before publishing, show the user a preview:
    - What was published
    - How to update in the future
 
-## Error Handling
+## Error Handling (User-Friendly)
 
-Handle these errors gracefully with guided remediation:
+**IMPORTANT**: Never show technical commands to non-technical users. Handle errors silently when possible, or explain in plain language.
 
-| Error | Response |
-|-------|----------|
-| `gh` not installed | "GitHub CLI (gh) is required. Install it from https://cli.github.com/" |
-| `gh` not authenticated | "Let's authenticate with GitHub. Run: `gh auth login`" |
-| Repository not found | "I couldn't find that repository. Please verify the name (format: owner/repo) and that you have access." |
-| Push rejected | "The push was rejected. This usually means there are remote changes. Would you like me to pull and merge, or force push?" |
-| Pages not enabled | "GitHub Pages isn't enabled for this repo. Go to Settings → Pages and select the gh-pages branch as the source." |
-| Enterprise SSO required | "This repo requires SSO authentication. Run: `gh auth login --hostname <enterprise-host>`" |
-| SAML SSO blocking clone | "Visit the authorization URL in the error, then run: `gh auth refresh -h github.com -s repo,read:org`" |
-| Push blocked by OAuth app | Use `git config --local credential.helper '!gh auth git-credential'` then retry push |
-| Private repo, no Pages | "This repo is private. Make it public with: `gh repo edit owner/repo --visibility public --accept-visibility-change-consequences`" |
+| Error | User-Friendly Response |
+|-------|------------------------|
+| `gh` not installed | "I need to connect to GitHub but the connection tool isn't set up yet. [Open setup guide](https://cli.github.com/) - it takes about 2 minutes." |
+| `gh` not authenticated | "I need to connect to your GitHub account. I'll open a browser window for you to sign in." Then run `gh auth login` automatically. |
+| Repository not found | "I can't find that location. Could you paste the link from your browser when you're on the GitHub page?" |
+| Push rejected | "Someone else made changes. Let me sync those first..." Then handle automatically. |
+| Pages not enabled | Handle silently - enable via API. If that fails: "I need to turn on web publishing for this location. I'll open the settings page for you." |
+| SAML/SSO required | "Your organization requires an extra sign-in step. I'll open the authorization page - just click Authorize when it appears." Then open the URL automatically. |
+| Push blocked by OAuth | Handle silently with token-in-URL approach. User should never see this. |
+| Private repo, no Pages | "This is a private location. To publish a public webpage, I'll need to make it visible. Is that okay? (Your other content stays private - only the webpage becomes public)" |
+
+**Principle**: If Claude can fix it automatically, do so silently. Only ask the user when a decision is genuinely needed.
 
 ## Iterative Updates
 
