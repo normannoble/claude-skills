@@ -210,12 +210,24 @@ Before publishing, show the user a preview:
 
 ## Iterative Updates
 
-When updating an existing site:
+Users can edit pages in fresh conversations - no need to remember details.
 
-1. Check `~/.claude/github-pages-sites.json` for tracked sites
-2. If user mentions a known site, offer to update it
-3. Show current content and ask what to change
-4. Follow the same preview → publish flow
+**Trigger phrases:**
+- "Edit my product page"
+- "Update the landing page"
+- "Change the pricing section"
+- `/pages edit <name>`
+- `/pages list` then select one
+
+**Flow (see lib/retrieval.md for details):**
+
+1. Match user's description to tracked sites in `~/.claude/github-pages-sites.json`
+2. If ambiguous, show list and ask which one
+3. Fetch current HTML content from GitHub via `gh api`
+4. Parse and present the page structure to user
+5. User describes changes in plain language
+6. Regenerate HTML with changes
+7. Preview → Publish (overwrites same folder)
 
 ## Templates
 
@@ -271,7 +283,38 @@ Use these as starting points when appropriate:
 
 ## Subcommands
 
-The skill supports these subcommands for configuration:
+### `/pages list`
+Show all your published pages:
+```
+Claude: Your published pages:
+
+        1. Product Strategy 2026
+           https://yoursite.github.io/pages/product-strategy-2026/
+           Last updated: January 15, 2026
+
+        2. Team Onboarding Guide
+           https://yoursite.github.io/pages/team-onboarding/
+
+        Say "edit [name]" to make changes, or "delete [name]" to remove.
+```
+
+### `/pages edit <name>`
+Edit a previously published page. Fetches content from GitHub:
+```
+/pages edit product strategy
+
+Claude: Here's your "Product Strategy 2026" page:
+
+        Sections:
+        1. Vision and Mission
+        2. Feature Roadmap
+        3. Competitive Positioning
+
+        What would you like to change?
+```
+
+### `/pages delete <name>`
+Remove a published page (asks for confirmation).
 
 ### `/pages config`
 Show current configuration (project, user, enterprise).
