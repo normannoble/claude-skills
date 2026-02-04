@@ -141,19 +141,38 @@ git pull --rebase origin gh-pages
 git push origin gh-pages
 ```
 
-### Step 7: Verify Pages Deployment
+### Step 7: Verify and Enable Pages
 
 Check if Pages is configured:
 ```bash
 gh api repos/<owner>/<repo>/pages --jq '.html_url'
 ```
 
-If Pages not enabled, the API will return an error. Guide user to enable it:
-1. Go to repository Settings
-2. Navigate to Pages section
-3. Under "Build and deployment", select:
-   - Source: "Deploy from a branch"
-   - Branch: "gh-pages" / root
+If Pages not enabled, enable it via API:
+```bash
+# IMPORTANT: Use --input with JSON, not -f with stringified JSON
+gh api repos/<owner>/<repo>/pages -X POST --input - <<EOF
+{
+  "build_type": "legacy",
+  "source": {
+    "branch": "gh-pages",
+    "path": "/"
+  }
+}
+EOF
+```
+
+**Common API errors:**
+- `HTTP 409 "already enabled"` - Pages already active, ignore error
+- `HTTP 422 "plan does not support"` - Repo is private on free plan, need to make public or upgrade
+
+**If repo is private and user wants Pages:**
+```bash
+# Make repo public (requires explicit confirmation)
+gh repo edit <owner>/<repo> --visibility public --accept-visibility-change-consequences
+```
+
+Then retry enabling Pages.
 
 ### Step 8: Return Published URL
 
@@ -190,6 +209,27 @@ Your GitHub token may have expired. Let's re-authenticate:
 Run: gh auth login
 
 If you're using an enterprise GitHub, add: --hostname <your-enterprise-host>
+```
+
+**Error**: `SAML SSO enforcement` or `Resource protected by organization SAML enforcement`
+```
+This organization requires SSO authentication.
+
+1. First, visit the authorization URL shown in the error
+2. Then refresh your token with org access:
+
+   gh auth refresh -h github.com -s repo,read:org
+
+3. I'll retry the operation after you confirm.
+```
+
+**Error**: `OAuth Application` blocked by SAML (push fails after clone works)
+
+When `gh repo clone` works but `git push` fails with "re-authorize the OAuth Application":
+```bash
+# Use gh as git credential helper instead of other OAuth apps
+git config --local credential.helper '!gh auth git-credential'
+git push -u origin gh-pages
 ```
 
 ### Repository Errors

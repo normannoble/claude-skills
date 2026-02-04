@@ -107,7 +107,11 @@ Before publishing, show the user a preview:
    ```bash
    gh repo clone <owner/repo> <temp-dir>
    cd <temp-dir>
-   git checkout gh-pages || git checkout -b gh-pages
+
+   # Use gh for git credentials (avoids OAuth app conflicts with SAML)
+   git config --local credential.helper '!gh auth git-credential'
+
+   git checkout gh-pages || git checkout --orphan gh-pages
 
    # Check folder doesn't exist
    if [ -d "<folder-name>" ]; then
@@ -170,6 +174,9 @@ Handle these errors gracefully with guided remediation:
 | Push rejected | "The push was rejected. This usually means there are remote changes. Would you like me to pull and merge, or force push?" |
 | Pages not enabled | "GitHub Pages isn't enabled for this repo. Go to Settings → Pages and select the gh-pages branch as the source." |
 | Enterprise SSO required | "This repo requires SSO authentication. Run: `gh auth login --hostname <enterprise-host>`" |
+| SAML SSO blocking clone | "Visit the authorization URL in the error, then run: `gh auth refresh -h github.com -s repo,read:org`" |
+| Push blocked by OAuth app | Use `git config --local credential.helper '!gh auth git-credential'` then retry push |
+| Private repo, no Pages | "This repo is private. Make it public with: `gh repo edit owner/repo --visibility public --accept-visibility-change-consequences`" |
 
 ## Iterative Updates
 
