@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{description}}">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{description}}">
+    <meta property="og:type" content="article">
+    <meta property="article:published_time" content="{{published_date}}">
+    <meta property="article:author" content="{{author}}">
+    <title>{{title}}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #4a4a68;
+            --accent: #0066cc;
+            --bg: #ffffff;
+            --bg-alt: #f8f9fa;
+            --text: #333333;
+            --text-light: #666666;
+            --border: #e0e0e0;
+        }
+
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        /* Header */
+        header {
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+        }
+
+        .header-content {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        nav a {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin-left: 1.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        nav a:hover {
+            color: var(--accent);
+        }
+
+        /* Article */
+        article {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        .article-header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .article-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+
+        .article-meta {
+            font-family: system-ui, -apple-system, sans-serif;
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .article-meta .author {
+            font-weight: 500;
+        }
+
+        .article-meta .date {
+            margin-left: 0.5rem;
+        }
+
+        .article-meta .date::before {
+            content: "·";
+            margin-right: 0.5rem;
+        }
+
+        /* Article content */
+        .article-content {
+            font-size: 1.125rem;
+        }
+
+        .article-content p {
+            margin-bottom: 1.5rem;
+        }
+
+        .article-content h2 {
+            font-size: 1.75rem;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .article-content h3 {
+            font-size: 1.35rem;
+            margin-top: 2.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+        }
+
+        .article-content ul,
+        .article-content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .article-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .article-content a {
+            color: var(--accent);
+        }
+
+        .article-content blockquote {
+            border-left: 3px solid var(--accent);
+            padding-left: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            color: var(--text-light);
+        }
+
+        .article-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .article-content figure {
+            margin: 2rem 0;
+        }
+
+        .article-content figcaption {
+            font-family: system-ui, -apple-system, sans-serif;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+
+        /* Code */
+        code {
+            font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        :not(pre) > code {
+            background: var(--bg-alt);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+        }
+
+        pre {
+            background: var(--bg-alt);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 2rem 0;
+            font-size: 0.95rem;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+        }
+
+        /* Divider */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        /* Author bio */
+        .author-bio {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 2rem;
+            background: var(--bg-alt);
+            border-radius: 12px;
+            margin-top: 3rem;
+        }
+
+        .author-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--border);
+        }
+
+        .author-info {
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .author-info h4 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .author-info p {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        /* Footer */
+        footer {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+            text-align: center;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .article-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .article-content {
+                font-size: 1rem;
+            }
+
+            .author-bio {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">{{brand}}</a>
+            <nav>
+                {{#nav_links}}
+                <a href="{{link}}">{{text}}</a>
+                {{/nav_links}}
+            </nav>
+        </div>
+    </header>
+
+    <article>
+        <header class="article-header">
+            <h1>{{title}}</h1>
+            <div class="article-meta">
+                <span class="author">{{author}}</span>
+                <span class="date">{{published_date}}</span>
+            </div>
+        </header>
+
+        <div class="article-content">
+            {{content}}
+        </div>
+
+        {{#show_author_bio}}
+        <div class="author-bio">
+            <div class="author-avatar"></div>
+            <div class="author-info">
+                <h4>{{author}}</h4>
+                <p>{{author_bio}}</p>
+            </div>
+        </div>
+        {{/show_author_bio}}
+    </article>
+
+    <footer>
+        <p>{{footer_text}}</p>
+    </footer>
+</body>
+</html>
