@@ -19,19 +19,67 @@ A Claude Code skill that enables non-technical users to generate static web cont
 
 ## Installation
 
-1. Copy the `github-pages-publisher` folder to your Claude Code skills directory:
+### 1. Install the Skill
+
+Copy the `pages` folder to your Claude Code skills directory (exclude `.git` to avoid permission errors):
 
 ```bash
-cp -r github-pages-publisher ~/.claude/skills/
+rsync -av --exclude='.git' pages ~/.claude/skills/
 ```
 
-Or create a symlink:
+Or create a symlink (recommended for development):
 
 ```bash
-ln -s /path/to/github-pages-publisher ~/.claude/skills/github-pages-publisher
+mkdir -p ~/.claude/skills
+ln -sf /path/to/pages ~/.claude/skills/pages
 ```
 
-2. The skill will be available in Claude Code as `/pages`
+### 2. Configure Claude Code Permissions
+
+For smooth operation without repeated permission prompts, add these to your `~/.claude/settings.json`:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Read(~/.claude/*)",
+      "Bash(rm -rf /tmp/*)",
+      "Bash(gh *)",
+      "Bash(git *)",
+      "Bash(open *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)"
+    ]
+  }
+}
+```
+
+If you already have a settings file, merge the `allow` array with your existing permissions.
+
+### 3. Configure Default Repositories
+
+Create `~/.claude/pages-config.json` to set your publishing destinations:
+
+```json
+{
+  "defaultPublicRepo": "username/my-public-site",
+  "defaultPrivateRepo": "myorg/internal-docs"
+}
+```
+
+With both configured, Claude will only offer these two options when publishing:
+```
+Who should be able to see this page?
+
+1. Everyone on the internet
+2. Only people in your organization
+```
+
+If you only set one (public or private), that repo is used automatically without prompting.
+
+### 4. Verify
+
+The skill will be available in Claude Code as `/pages`
 
 ## Usage
 
@@ -132,17 +180,19 @@ your-repo (gh-pages branch)/
 
 ## Configuration
 
-### Repository Configuration
+### Repository Resolution Order
 
 The skill checks for repo settings in this order:
 
 1. **Command argument**: `/pages --repo myorg/repo`
 2. **Project config**: `.claude/pages.json` in your project
 3. **Enterprise policy**: `~/.claude/pages-policy.json` (admin-managed)
-4. **User default**: `~/.claude/pages-config.json`
-5. **Interactive prompt**: Asked during publish
+4. **User default**: `~/.claude/pages-config.json` (see Installation step 3)
+5. **Interactive prompt**: Only if no config exists
 
 #### Set Project Repo
+
+Lock a project to a specific repo:
 
 ```
 /pages set-repo myorg/project-docs
@@ -156,27 +206,12 @@ Creates `.claude/pages.json`:
 }
 ```
 
-#### Set Personal Defaults
+#### Set Personal Defaults via Command
 
-Set separate defaults for public and private pages:
+Alternative to manually editing `~/.claude/pages-config.json`:
 
 ```
 /pages set-default --public username/my-site --private myorg/internal-docs
-```
-
-Creates `~/.claude/pages-config.json`:
-```json
-{
-  "defaultPublicRepo": "username/my-site",
-  "defaultPrivateRepo": "myorg/internal-docs"
-}
-```
-
-When publishing, Claude will ask which visibility you want:
-```
-Should this be public or private?
-1. Public (username/my-site) - Anyone can view
-2. Private (myorg/internal-docs) - Only org members can view
 ```
 
 #### Enterprise Policy (Admin)
@@ -219,7 +254,7 @@ gh auth login --hostname your-enterprise-host.com
 ## File Structure
 
 ```
-github-pages-publisher/
+pages/
 ├── skill.md              # Main skill definition
 ├── lib/
 │   ├── generator.md      # Content generation patterns
@@ -242,6 +277,10 @@ The skill creates these files to track state:
 
 ## Troubleshooting
 
+### Repeated permission prompts
+
+If Claude keeps asking for permission to run commands, ensure you've configured `~/.claude/settings.json` as described in Installation step 2. Changes take effect in new sessions.
+
 ### "gh: not logged in"
 
 Run `gh auth login` and follow the prompts.
@@ -257,6 +296,13 @@ The remote has changes you don't have. Claude will offer to pull and merge or fo
 ### "Pages not enabled"
 
 Go to repository Settings → Pages and enable GitHub Pages with the gh-pages branch.
+
+### Permission denied when copying skill
+
+If you get permission errors when copying with `cp -r`, use rsync instead:
+```bash
+rsync -av --exclude='.git' pages ~/.claude/skills/
+```
 
 ## License
 

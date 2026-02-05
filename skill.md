@@ -11,6 +11,27 @@ This skill helps non-technical users publish static websites to GitHub Pages. It
 1. **Conversation → Pages**: Extract and publish content from your current conversation
 2. **Create Fresh**: Build new content from scratch
 
+## Allowed Tools
+
+```yaml
+- Bash(gh auth status)
+- Bash(gh auth token)
+- Bash(gh repo clone *)
+- Bash(gh repo view *)
+- Bash(gh api *)
+- Bash(git checkout *)
+- Bash(git add *)
+- Bash(git commit *)
+- Bash(git push *)
+- Bash(git remote *)
+- Bash(open *)
+- Bash(xdg-open *)
+- Read(~/.claude/pages-config.json)
+- Bash(mkdir *)
+- Bash(cp *)
+- Bash(rm -rf /tmp/claude-pages-*)
+```
+
 ## Workflow
 
 When the user invokes `/pages`, follow this process:
@@ -96,9 +117,27 @@ Before publishing, show the user a preview:
    - Project config: `.claude/pages.json` in current directory
    - Enterprise policy: `~/.claude/pages-policy.json` (if exists, only allowed repos)
    - User default: `~/.claude/pages-config.json`
-   - Interactive prompt (user-friendly)
+   - Interactive prompt (only if no config exists)
 
-   **If no config exists, ask in friendly terms:**
+   **IMPORTANT: Check user defaults first.** Use the Read tool to read `~/.claude/pages-config.json`. If the file doesn't exist, treat it as "no config".
+
+   **If both `defaultPublicRepo` AND `defaultPrivateRepo` are configured:**
+   Only offer these two options - do NOT list other repos or search GitHub:
+   ```
+   Claude: Who should be able to see this page?
+
+           1. Everyone on the internet
+           2. Only people in your organization
+   ```
+   Then use the corresponding repo (`defaultPublicRepo` for option 1, `defaultPrivateRepo` for option 2).
+
+   **If only one default is configured** (either public or private):
+   Use that repo automatically without asking.
+
+   **If enterprise policy exists:**
+   Validate the selected repo is in the allowed list before proceeding.
+
+   **Only if NO config exists at all**, ask in friendly terms:
    ```
    Claude: Where would you like to publish this?
 
@@ -110,8 +149,6 @@ Before publishing, show the user a preview:
    - Full URL: `https://github.com/username/my-site`
    - Short form: `username/my-site`
    - Just paste from browser
-
-   If enterprise policy exists, validate repo is in allowed list before proceeding.
 
 3. **Ask for a title** (user-friendly):
 
@@ -134,9 +171,20 @@ Before publishing, show the user a preview:
    - Check for conflicts silently, append number if needed (e.g., `-2`)
 
 4. **Clone and prepare**:
+
+   **IMPORTANT: Run each command as a SEPARATE Bash tool call. Do NOT chain commands with `&&` or `;` - this breaks permission matching.**
+
+   First, clean up any existing temp directory:
+   ```bash
+   rm -rf <temp-dir>
+   ```
+
+   Then clone:
    ```bash
    gh repo clone <owner/repo> <temp-dir>
-   cd <temp-dir>
+   ```
+
+   Then cd (or use absolute paths):
 
    # CRITICAL: Set remote URL with gh token to bypass other OAuth apps (VS Code, etc.)
    TOKEN=$(gh auth token)
@@ -344,6 +392,7 @@ Publish to a specific repo (one-time override).
 
 ## Notes
 
+- **NEVER chain bash commands with `&&` or `;`** - run each as a separate Bash tool call (required for permission matching)
 - Always generate self-contained HTML - no external dependencies
 - Embed images as base64 to keep everything in one file
 - Use modern, accessible HTML5 patterns
