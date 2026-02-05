@@ -19,7 +19,25 @@ A Claude Code skill that enables non-technical users to generate static web cont
 
 ## Installation
 
-### 1. Install the Skill
+### Quick Install (Recommended)
+
+Run the install script:
+
+```bash
+./install.sh
+```
+
+This will:
+- Copy the skill to `~/.claude/skills/pages/`
+- Configure required permissions in `~/.claude/settings.json`
+- Optionally set up your default repositories
+
+### Manual Installation
+
+<details>
+<summary>Click to expand manual steps</summary>
+
+#### 1. Install the Skill
 
 Copy the `pages` folder to your Claude Code skills directory (exclude `.git` to avoid permission errors):
 
@@ -34,7 +52,7 @@ mkdir -p ~/.claude/skills
 ln -sf /path/to/pages ~/.claude/skills/pages
 ```
 
-### 2. Configure Claude Code Permissions
+#### 2. Configure Claude Code Permissions
 
 For smooth operation without repeated permission prompts, add these to your `~/.claude/settings.json`:
 
@@ -56,7 +74,11 @@ For smooth operation without repeated permission prompts, add these to your `~/.
 
 If you already have a settings file, merge the `allow` array with your existing permissions.
 
-### 3. Configure Default Repositories
+</details>
+
+### Configure Default Repositories
+
+> **Note:** The install script will prompt you for these settings. Skip this section if you already configured repos during installation.
 
 Create `~/.claude/pages-config.json` to set your publishing destinations:
 
@@ -77,7 +99,7 @@ Who should be able to see this page?
 
 If you only set one (public or private), that repo is used automatically without prompting.
 
-### 4. Verify
+### Verify Installation
 
 The skill will be available in Claude Code as `/pages`
 
