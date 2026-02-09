@@ -101,11 +101,15 @@ Proceed to publishing workflow.
 
 ### If user cancels:
 
+Only remove the preview copy — never touch the user's working directory files:
+
 ```bash
 rm -rf "$PREVIEW_DIR"
 ```
 
-Confirm: "Preview discarded. Let me know if you'd like to try again."
+The user's original HTML files (if any) remain untouched in their working directory.
+
+Confirm: "Preview discarded. Your original files are still in place. Let me know if you'd like to try again."
 
 ## Multi-page Preview
 
@@ -165,14 +169,18 @@ Common issues:
 
 ### Cleanup
 
-Always clean up preview files after:
+Always clean up the preview directory after:
 - User publishes (success)
 - User cancels
 - Session ends
 
+The preview directory is always a copy — safe to remove unconditionally:
+
 ```bash
 rm -rf "$HOME/.claude/pages-preview"
 ```
+
+**Never delete the user's source files in their working directory.** The preview directory is the only thing this workflow creates and cleans up. Original HTML files in the working directory are the user's property and must not be touched.
 
 ## Preview vs. Production Differences
 

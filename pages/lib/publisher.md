@@ -189,10 +189,16 @@ For custom domains (if configured): The custom domain URL
 
 ## Cleanup
 
-After successful publish:
+After successful publish, remove only the temp git clone directory. This is the only directory the publisher creates.
+
 ```bash
 rm -rf "$TEMP_DIR"
 ```
+
+**Cleanup boundaries:**
+- This step removes the temp clone dir only (`/tmp/claude-pages-*`)
+- The preview directory (`~/.claude/pages-preview/`) is cleaned up separately by the preview workflow
+- **Never** delete or modify HTML files in the user's working directory — those belong to the user regardless of whether they existed before `/pages` was invoked
 
 ## Error Handling
 

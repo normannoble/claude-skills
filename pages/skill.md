@@ -38,6 +38,24 @@ When the user invokes `/pages`, follow this process:
 
 ### Step 1: Detect Context
 
+**1a. Check for pre-existing HTML files in the working directory.**
+
+Look for `.html` files in the current working directory (use `ls *.html 2>/dev/null` or Glob). If HTML files exist:
+
+- These were likely created earlier in the conversation or by the user directly
+- Present them to the user:
+  ```
+  Claude: I found these HTML files in your current folder:
+          - index.html
+          - about.html
+
+          Would you like me to publish these as-is?
+  ```
+- If the user confirms, mark these as **pre-existing source files** — skip Step 2 and Step 3 entirely, go straight to Step 4 (preview)
+- If the user declines, proceed with normal flow below
+
+**1b. Check conversation context.**
+
 Check if there's substantial prior conversation (more than a few exchanges). If yes, offer to extract content from it. If no (or minimal conversation), proceed to fresh creation.
 
 ### Step 2A: Conversation Extraction (if prior conversation exists)
@@ -238,6 +256,24 @@ Before publishing, show the user a preview:
    - Published URL
    - What was published
    - How to update in the future
+
+### Step 7: Cleanup
+
+After publishing (or cancelling), clean up temporary files. The rules depend on where the source files came from:
+
+- **Always clean up** (these are temporary copies the skill created):
+  - Preview directory: `~/.claude/pages-preview/`
+  - Temp git clone directory: `/tmp/claude-pages-*`
+
+- **Never clean up** (these belong to the user):
+  - HTML files in the user's working directory — whether they were pre-existing before `/pages` was invoked or created earlier in the conversation
+
+```bash
+rm -rf "$HOME/.claude/pages-preview"
+rm -rf /tmp/claude-pages-*
+```
+
+**Do NOT delete or modify any files in the user's working directory.**
 
 ## Error Handling (User-Friendly)
 
